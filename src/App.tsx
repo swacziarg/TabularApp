@@ -1,4 +1,5 @@
 import { autoDetectHasHeader, getHeadersAndDataRows } from './utils/headers';
+import { KeyColumnSelector } from './components/KeyColumnSelector';
 import { detectDelimiter } from './utils/delimiters';
 import { parseTextToGrid, type ParsedGrid } from './utils/parse';
 import { TablePreview } from './components/TablePreview';
@@ -26,6 +27,9 @@ export default function App() {
   const [bFirstRowHeader, setBFirstRowHeader] = useState(false);
 
   const [caseInsensitive, setCaseInsensitive] = useState(true);
+
+  const [keyColumnA, setKeyColumnA] = useState<string>('');
+  const [keyColumnB, setKeyColumnB] = useState<string>('');
 
   const aHeaderInfo = useMemo(() => {
     if (!parsedA) return null;
@@ -56,8 +60,24 @@ export default function App() {
     setParsedA(a);
     setParsedB(b);
 
-    setAFirstRowHeader(autoDetectHasHeader(a.rows));
-    setBFirstRowHeader(autoDetectHasHeader(b.rows));
+    const autoHeaderA = autoDetectHasHeader(a.rows);
+    const autoHeaderB = autoDetectHasHeader(b.rows);
+
+    setAFirstRowHeader(autoHeaderA);
+    setBFirstRowHeader(autoHeaderB);
+
+    const aInfo = getHeadersAndDataRows(a.rows, autoHeaderA);
+    const bInfo = getHeadersAndDataRows(b.rows, autoHeaderB);
+
+    const firstAHeader = aInfo.headers[0] ?? '';
+    const firstBHeader = bInfo.headers[0] ?? '';
+
+    // Prefer matching name if possible, else fall back to first column
+    const defaultA = firstAHeader;
+    const defaultB = bInfo.headers.includes(defaultA) ? defaultA : firstBHeader;
+
+    setKeyColumnA(defaultA);
+    setKeyColumnB(defaultB);
   };
 
   const handleClear = () => {
@@ -181,9 +201,27 @@ export default function App() {
             ) : null}
           </section>
         </div>
-        
+
         <section className="card settingsCard">
           <h2 className="cardTitle">Settings</h2>
+
+          <div className="settingsGrid">
+            <KeyColumnSelector
+              label="Key column (A)"
+              value={keyColumnA}
+              onChange={setKeyColumnA}
+              options={aHeaderInfo?.headers ?? []}
+              disabled={!aHeaderInfo?.headers?.length}
+            />
+
+            <KeyColumnSelector
+              label="Key column (B)"
+              value={keyColumnB}
+              onChange={setKeyColumnB}
+              options={bHeaderInfo?.headers ?? []}
+              disabled={!bHeaderInfo?.headers?.length}
+            />
+          </div>
 
           <label className="checkboxRow">
             <input
