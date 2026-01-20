@@ -1,3 +1,4 @@
+import { buildRowObjects, type RowObject } from './utils/rows';
 import { autoDetectHasHeader, getHeadersAndDataRows } from './utils/headers';
 import { KeyColumnSelector } from './components/KeyColumnSelector';
 import { detectDelimiter } from './utils/delimiters';
@@ -22,6 +23,9 @@ export default function App() {
 
   const [parsedA, setParsedA] = useState<ParsedGrid | null>(null);
   const [parsedB, setParsedB] = useState<ParsedGrid | null>(null);
+  
+  const [rowsA, setRowsA] = useState<RowObject[]>([]);
+  const [rowsB, setRowsB] = useState<RowObject[]>([]);
 
   const [aFirstRowHeader, setAFirstRowHeader] = useState(false);
   const [bFirstRowHeader, setBFirstRowHeader] = useState(false);
@@ -69,6 +73,12 @@ export default function App() {
     const aInfo = getHeadersAndDataRows(a.rows, autoHeaderA);
     const bInfo = getHeadersAndDataRows(b.rows, autoHeaderB);
 
+    const builtA = buildRowObjects(aInfo.headers, aInfo.dataRows);
+    const builtB = buildRowObjects(bInfo.headers, bInfo.dataRows);
+
+    setRowsA(builtA.rows);
+    setRowsB(builtB.rows);
+
     const firstAHeader = aInfo.headers[0] ?? '';
     const firstBHeader = bInfo.headers[0] ?? '';
 
@@ -85,6 +95,8 @@ export default function App() {
     setTableBText('');
     setParsedA(null);
     setParsedB(null);
+    setRowsA([]);
+    setRowsB([]);
   };
 
   return (
@@ -221,6 +233,11 @@ export default function App() {
               options={bHeaderInfo?.headers ?? []}
               disabled={!bHeaderInfo?.headers?.length}
             />
+          </div>
+          
+          <div className="parseMeta">
+            <strong>Row objects:</strong> A={rowsA.length.toLocaleString()} • B=
+            {rowsB.length.toLocaleString()}
           </div>
 
           <label className="checkboxRow">
