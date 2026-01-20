@@ -234,3 +234,73 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+.resultsCard {
+  margin-top: 16px;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+@media (min-width: 900px) {
+  .summaryGrid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+}
+
+.summaryCard {
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.summaryLabel {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.summaryValue {
+  font-size: 18px;
+  font-weight: 700;
+  margin-top: 4px;
+}
+
+.tabsRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  margin-bottom: 12px;
+}
+
+.tabBtn {
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.9);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 12px;
+}
+
+.tabBtnActive {
+  background: rgba(255, 255, 255, 0.92);
+  color: #0b0d12;
+}
+
+.resultsBody {
+  margin-top: 10px;
+}
+
+.emptyState {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px dashed rgba(255, 255, 255, 0.12);
+  opacity: 0.75;
+  font-size: 13px;
+}

@@ -72,18 +72,18 @@
   - [X] If header off → generate `Column 1..N`
   - ✅ Deliverable: column names available
 
-- [ ] **Commit 11:** `feat: normalize cell values (trim, collapse whitespace)`
-  - [ ] Trim each cell
-  - [ ] Collapse whitespace
-  - [ ] Normalize empty values
-  - [ ] Add toggle: “Case-insensitive compare”
+- [X] **Commit 11:** `feat: normalize cell values (trim, collapse whitespace)`
+  - [X] Trim each cell
+  - [X] Collapse whitespace
+  - [X] Normalize empty values
+  - [X] Add toggle: “Case-insensitive compare”
   - ✅ Deliverable: stable normalized dataset
 
-- [ ] **Commit 12:** `feat: add column selector dropdowns for key column`
-  - [ ] Dropdown: Key column for A
-  - [ ] Dropdown: Key column for B
-  - [ ] Default B = same name if possible
-  - [ ] Validate selection exists
+- [X] **Commit 12:** `feat: add column selector dropdowns for key column`
+  - [X] Dropdown: Key column for A
+  - [X] Dropdown: Key column for B
+  - [X] Default B = same name if possible
+  - [X] Validate selection exists
   - ✅ Deliverable: user can pick match key
 
 ---
@@ -92,23 +92,23 @@
 
 **Goal:** Detect missing + changed rows.
 
-- [ ] **Commit 13:** `feat: build row objects from parsed grid + headers`
-  - [ ] Convert grid into `RowObject[]`
-  - [ ] Track original row index
+- [X] **Commit 13:** `feat: build row objects from parsed grid + headers`
+  - [X] Convert grid into `RowObject[]`
+  - [X] Track original row index
   - ✅ Deliverable: structured data ready
 
-- [ ] **Commit 14:** `feat: implement compare by key (missing A/B)`
-  - [ ] Build maps: `key → row`
-  - [ ] Compute:
-    - [ ] Missing in B
-    - [ ] Missing in A
+- [X] **Commit 14:** `feat: implement compare by key (missing A/B)`
+  - [X] Build maps: `key → row`
+  - [X] Compute:
+    - [X] Missing in B
+    - [X] Missing in A
   - ✅ Deliverable: missing rows computed
 
-- [ ] **Commit 15:** `feat: implement changed rows detection (per-cell diff)`
-  - [ ] For shared keys:
-    - [ ] Detect cell changes
-    - [ ] Track changed columns
-    - [ ] Store before/after values
+- [X] **Commit 15:** `feat: implement changed rows detection (per-cell diff)`
+  - [X] For shared keys:
+    - [X] Detect cell changes
+    - [X] Track changed columns
+    - [X] Store before/after values
   - ✅ Deliverable: changed rows computed
 
 - [ ] **Commit 16:** `feat: show comparison summary counts + results tabs`

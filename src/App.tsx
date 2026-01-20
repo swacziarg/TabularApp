@@ -1,3 +1,6 @@
+import { Tabs } from './components/Tabs';
+import { SummaryCards } from './components/SummaryCards';
+import { ResultsTable } from './components/ResultsTable';
 import { compareChangedByKey, compareMissingByKey } from './utils/compare';
 import type { ChangedRow } from './utils/compare';
 import { buildRowObjects, type RowObject } from './utils/rows';
@@ -41,6 +44,8 @@ export default function App() {
   const [missingInB, setMissingInB] = useState<RowObject[]>([]);
 
   const [changedRows, setChangedRows] = useState<ChangedRow[]>([]);
+
+  const [activeTab, setActiveTab] = useState<'missingB' | 'missingA' | 'changed'>('missingB');
 
   const aHeaderInfo = useMemo(() => {
     if (!parsedA) return null;
@@ -281,7 +286,7 @@ export default function App() {
           <div className="parseMeta">
             <strong>Changed:</strong> {changedRows.length.toLocaleString()} rows
           </div>
-          
+
           <label className="checkboxRow">
             <input
               type="checkbox"
@@ -300,6 +305,53 @@ export default function App() {
             Clear
           </button>
         </div>
+
+        {parsedA && parsedB ? (
+          <>
+            <section className="card resultsCard">
+              <h2 className="cardTitle">Summary</h2>
+
+              <SummaryCards
+                totalA={rowsA.length}
+                totalB={rowsB.length}
+                missingInA={missingInA.length}
+                missingInB={missingInB.length}
+                changed={changedRows.length}
+              />
+            </section>
+
+            <section className="card resultsCard">
+              <h2 className="cardTitle">Results</h2>
+
+              <Tabs
+                tabs={[
+                  { id: 'missingB', label: `Missing in B (${missingInB.length})` },
+                  { id: 'missingA', label: `Missing in A (${missingInA.length})` },
+                  { id: 'changed', label: `Changed (${changedRows.length})` },
+                ]}
+                activeTab={activeTab}
+                onChange={(id) => setActiveTab(id as any)}
+              />
+
+              <div className="resultsBody">
+                {activeTab === 'missingB' && aHeaderInfo ? (
+                  <ResultsTable headers={aHeaderInfo.headers} rows={missingInB} />
+                ) : null}
+
+                {activeTab === 'missingA' && bHeaderInfo ? (
+                  <ResultsTable headers={bHeaderInfo.headers} rows={missingInA} />
+                ) : null}
+
+                {activeTab === 'changed' ? (
+                  <div className="emptyState">
+                    Changed rows table coming next commit (cell highlighting)
+                  </div>
+                ) : null}
+              </div>
+            </section>
+          </>
+        ) : null}
+
       </main>
 
       <footer className="appFooter">
