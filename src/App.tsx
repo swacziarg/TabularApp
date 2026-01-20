@@ -1,5 +1,6 @@
 import { detectDelimiter } from './utils/delimiters';
 import { parseTextToGrid, type ParsedGrid } from './utils/parse';
+import { TablePreview } from './components/TablePreview';
 import { useMemo, useState } from 'react';
 import './App.css';
 
@@ -90,6 +91,13 @@ export default function App() {
                 '—'
               )}
             </div>
+
+            {parsedA?.rows?.length ? (
+              <div className="previewSection">
+                <div className="previewHeader">Parsed Preview</div>
+                <TablePreview rows={parsedA.rows} />
+              </div>
+            ) : null}
           </section>
 
           <section className="card">
@@ -126,6 +134,13 @@ export default function App() {
                 '—'
               )}
             </div>
+
+            {parsedB?.rows?.length ? (
+              <div className="previewSection">
+                <div className="previewHeader">Parsed Preview</div>
+                <TablePreview rows={parsedB.rows} />
+              </div>
+            ) : null}
           </section>
         </div>
 
