@@ -1,3 +1,4 @@
+import { detectDelimiter } from './utils/delimiters';
 import { useMemo, useState } from 'react';
 import './App.css';
 
@@ -24,6 +25,9 @@ export default function App() {
   const aPreview = useMemo(() => getPreview(tableAText, 10), [tableAText]);
   const bPreview = useMemo(() => getPreview(tableBText, 10), [tableBText]);
 
+  const detectedA = useMemo(() => detectDelimiter(tableAText), [tableAText]);
+  const detectedB = useMemo(() => detectDelimiter(tableBText), [tableBText]);
+
   const handleParse = () => {
     alert('Parse clicked (coming next)');
   };
@@ -46,6 +50,9 @@ export default function App() {
             <div className="cardTopRow">
               <h2 className="cardTitle">Table A</h2>
               <div className="metaPills">
+                <span className="pill">
+                  Delim: {detectedA.label} ({detectedA.columnsEstimate} cols)
+                </span>
                 <span className="pill">{aChars.toLocaleString()} chars</span>
                 <span className="pill">{aLines.toLocaleString()} lines</span>
               </div>
@@ -68,6 +75,9 @@ export default function App() {
             <div className="cardTopRow">
               <h2 className="cardTitle">Table B</h2>
               <div className="metaPills">
+                <span className="pill">
+                  Delim: {detectedB.label} ({detectedB.columnsEstimate} cols)
+                </span>
                 <span className="pill">{bChars.toLocaleString()} chars</span>
                 <span className="pill">{bLines.toLocaleString()} lines</span>
               </div>
