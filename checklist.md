@@ -4,10 +4,10 @@
 
 **Goal:** Get a live empty app on GitHub Pages early.
 
-- [X] **Commit 1:** `chore: init vite react ts app`
-  - [X] Create repo
-  - [X] Run `npm create vite@latest` (React + TS)
-  - [X] Verify `npm run dev`
+- [ ] **Commit 1:** `chore: init vite react ts app`
+  - [ ] Create repo
+  - [ ] Run `npm create vite@latest` (React + TS)
+  - [ ] Verify `npm run dev`
   - ✅ Deliverable: local app running
 
 - [ ] **Commit 2:** `chore: add eslint + prettier`
