@@ -1,3 +1,4 @@
+import { ChangedResultsTable } from './components/ChangedResultsTable';
 import { Tabs } from './components/Tabs';
 import { SummaryCards } from './components/SummaryCards';
 import { ResultsTable } from './components/ResultsTable';
@@ -136,6 +137,13 @@ export default function App() {
     setMissingInB([]);
     setChangedRows([]);
   };
+
+  const sharedHeaders = useMemo(() => {
+    const aHeaders = aHeaderInfo?.headers ?? [];
+    const bHeaders = bHeaderInfo?.headers ?? [];
+    const bSet = new Set(bHeaders);
+    return aHeaders.filter((h) => bSet.has(h));
+  }, [aHeaderInfo?.headers, bHeaderInfo?.headers]);
 
   return (
     <div className="appShell">
@@ -343,9 +351,7 @@ export default function App() {
                 ) : null}
 
                 {activeTab === 'changed' ? (
-                  <div className="emptyState">
-                    Changed rows table coming next commit (cell highlighting)
-                  </div>
+                  <ChangedResultsTable changedRows={changedRows} headers={sharedHeaders} />
                 ) : null}
               </div>
             </section>

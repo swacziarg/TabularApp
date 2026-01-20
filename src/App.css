@@ -304,3 +304,28 @@
   opacity: 0.75;
   font-size: 13px;
 }
+
+.keyCell {
+  font-weight: 700;
+  opacity: 0.95;
+}
+
+.diffCell {
+  background: rgba(255, 255, 255, 0.06);
+  border-left: 2px solid rgba(255, 255, 255, 0.25);
+}
+
+.diffBefore {
+  opacity: 0.75;
+  font-size: 11px;
+}
+
+.diffArrow {
+  opacity: 0.5;
+  font-size: 11px;
+}
+
+.diffAfter {
+  font-weight: 700;
+  font-size: 12px;
+}
