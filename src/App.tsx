@@ -25,6 +25,8 @@ export default function App() {
   const [aFirstRowHeader, setAFirstRowHeader] = useState(false);
   const [bFirstRowHeader, setBFirstRowHeader] = useState(false);
 
+  const [caseInsensitive, setCaseInsensitive] = useState(true);
+
   const aHeaderInfo = useMemo(() => {
     if (!parsedA) return null;
     return getHeadersAndDataRows(parsedA.rows, aFirstRowHeader);
@@ -179,6 +181,19 @@ export default function App() {
             ) : null}
           </section>
         </div>
+        
+        <section className="card settingsCard">
+          <h2 className="cardTitle">Settings</h2>
+
+          <label className="checkboxRow">
+            <input
+              type="checkbox"
+              checked={caseInsensitive}
+              onChange={(e) => setCaseInsensitive(e.target.checked)}
+            />
+            Case-insensitive compare
+          </label>
+        </section>
 
         <div className="actionsRow">
           <button className="btnPrimary" onClick={handleParse}>

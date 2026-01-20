@@ -66,10 +66,10 @@
 
 **Goal:** User controls headers + cleaner data.
 
-- [ ] **Commit 10:** `feat: add header toggle and auto header detection`
-  - [ ] Checkbox: “First row is header”
-  - [ ] Auto-detect default after parsing
-  - [ ] If header off → generate `Column 1..N`
+- [X] **Commit 10:** `feat: add header toggle and auto header detection`
+  - [X] Checkbox: “First row is header”
+  - [X] Auto-detect default after parsing
+  - [X] If header off → generate `Column 1..N`
   - ✅ Deliverable: column names available
 
 - [ ] **Commit 11:** `feat: normalize cell values (trim, collapse whitespace)`

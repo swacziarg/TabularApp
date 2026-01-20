@@ -19,8 +19,9 @@ function splitLine(line: string, delimiter: string) {
 }
 
 function normalizeCell(value: string) {
-  return value.trim();
-}
+    // trim + collapse internal whitespace
+    return value.trim().replace(/\s+/g, ' ');
+}  
 
 function getNonEmptyLines(text: string) {
   return text
