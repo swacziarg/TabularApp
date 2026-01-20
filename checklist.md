@@ -33,9 +33,9 @@
 
 **Goal:** Paste text → parse rows/cols → show preview.
 
-- [ ] **Commit 5:** `feat: add two paste boxes for table A and B`
-  - [ ] Two textareas: Table A + Table B
-  - [ ] Buttons: Parse + Clear
+- [X] **Commit 5:** `feat: add two paste boxes for table A and B`
+  - [X] Two textareas: Table A + Table B
+  - [X] Buttons: Parse + Clear
   - ✅ Deliverable: paste content stored in state
 
 - [ ] **Commit 6:** `feat: add raw text preview + character/row counters`
