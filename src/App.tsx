@@ -1,3 +1,4 @@
+import { autoDetectHasHeader, getHeadersAndDataRows } from './utils/headers';
 import { detectDelimiter } from './utils/delimiters';
 import { parseTextToGrid, type ParsedGrid } from './utils/parse';
 import { TablePreview } from './components/TablePreview';
@@ -21,6 +22,19 @@ export default function App() {
   const [parsedA, setParsedA] = useState<ParsedGrid | null>(null);
   const [parsedB, setParsedB] = useState<ParsedGrid | null>(null);
 
+  const [aFirstRowHeader, setAFirstRowHeader] = useState(false);
+  const [bFirstRowHeader, setBFirstRowHeader] = useState(false);
+
+  const aHeaderInfo = useMemo(() => {
+    if (!parsedA) return null;
+    return getHeadersAndDataRows(parsedA.rows, aFirstRowHeader);
+  }, [parsedA, aFirstRowHeader]);
+
+  const bHeaderInfo = useMemo(() => {
+    if (!parsedB) return null;
+    return getHeadersAndDataRows(parsedB.rows, bFirstRowHeader);
+  }, [parsedB, bFirstRowHeader]);
+
   const aChars = tableAText.length;
   const bChars = tableBText.length;
 
@@ -39,6 +53,9 @@ export default function App() {
 
     setParsedA(a);
     setParsedB(b);
+
+    setAFirstRowHeader(autoDetectHasHeader(a.rows));
+    setBFirstRowHeader(autoDetectHasHeader(b.rows));
   };
 
   const handleClear = () => {
@@ -76,6 +93,16 @@ export default function App() {
               onChange={(e) => setTableAText(e.target.value)}
             />
 
+            <label className="checkboxRow">
+              <input
+                type="checkbox"
+                checked={aFirstRowHeader}
+                onChange={(e) => setAFirstRowHeader(e.target.checked)}
+              />
+              First row is header
+            </label>
+
+
             <div className="rawPreview">
               <div className="rawPreviewHeader">Raw preview (first 10 lines)</div>
               <pre className="rawPreviewBody">{aPreview || '—'}</pre>
@@ -92,10 +119,10 @@ export default function App() {
               )}
             </div>
 
-            {parsedA?.rows?.length ? (
+            {parsedA?.rows?.length && aHeaderInfo ? (
               <div className="previewSection">
                 <div className="previewHeader">Parsed Preview</div>
-                <TablePreview rows={parsedA.rows} />
+                <TablePreview headers={aHeaderInfo.headers} rows={aHeaderInfo.dataRows} />
               </div>
             ) : null}
           </section>
@@ -119,6 +146,15 @@ export default function App() {
               onChange={(e) => setTableBText(e.target.value)}
             />
 
+            <label className="checkboxRow">
+              <input
+                type="checkbox"
+                checked={bFirstRowHeader}
+                onChange={(e) => setBFirstRowHeader(e.target.checked)}
+              />
+              First row is header
+            </label>
+
             <div className="rawPreview">
               <div className="rawPreviewHeader">Raw preview (first 10 lines)</div>
               <pre className="rawPreviewBody">{bPreview || '—'}</pre>
@@ -135,10 +171,10 @@ export default function App() {
               )}
             </div>
 
-            {parsedB?.rows?.length ? (
+            {parsedB?.rows?.length && bHeaderInfo ? (
               <div className="previewSection">
                 <div className="previewHeader">Parsed Preview</div>
-                <TablePreview rows={parsedB.rows} />
+                <TablePreview headers={bHeaderInfo.headers} rows={bHeaderInfo.dataRows} />
               </div>
             ) : null}
           </section>

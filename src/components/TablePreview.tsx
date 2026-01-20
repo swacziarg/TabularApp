@@ -1,9 +1,10 @@
 type TablePreviewProps = {
+    headers?: string[];
     rows: string[][];
     maxRows?: number;
   };
   
-  export function TablePreview({ rows, maxRows = 30 }: TablePreviewProps) {
+  export function TablePreview({ headers, rows, maxRows = 30 }: TablePreviewProps) {
     if (rows.length === 0) return null;
   
     const previewRows = rows.slice(0, maxRows);
@@ -11,6 +12,16 @@ type TablePreviewProps = {
     return (
       <div className="tablePreviewWrap">
         <table className="tablePreview">
+          {headers?.length ? (
+            <thead>
+              <tr>
+                {headers.map((h, idx) => (
+                  <th key={idx}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+          ) : null}
+  
           <tbody>
             {previewRows.map((row, rIdx) => (
               <tr key={rIdx}>

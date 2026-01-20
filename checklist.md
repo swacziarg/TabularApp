@@ -43,21 +43,21 @@
   - [X] Show line count
   - ✅ Deliverable: paste debug confidence
 
-- [ ] **Commit 7:** `feat: implement delimiter detection (tab/csv/pipe/semicolon/space)`
-  - [ ] Implement `detectDelimiter(text)`
-  - [ ] Try: `\t`, `,`, `;`, `|`, multi-space
-  - [ ] Choose best delimiter via scoring
+- [X] **Commit 7:** `feat: implement delimiter detection (tab/csv/pipe/semicolon/space)`
+  - [X] Implement `detectDelimiter(text)`
+  - [X] Try: `\t`, `,`, `;`, `|`, multi-space
+  - [X] Choose best delimiter via scoring
   - ✅ Deliverable: delimiter auto-chosen
 
-- [ ] **Commit 8:** `feat: parse pasted text into 2D table data`
-  - [ ] Implement `parseTextToGrid(text)`
-  - [ ] Output: `rows: string[][]`
-  - [ ] Ensure consistent column count
+- [X] **Commit 8:** `feat: parse pasted text into 2D table data`
+  - [X] Implement `parseTextToGrid(text)`
+  - [X] Output: `rows: string[][]`
+  - [X] Ensure consistent column count
   - ✅ Deliverable: paste → structured grid
 
-- [ ] **Commit 9:** `feat: render parsed table previews for A and B`
-  - [ ] Render basic `<table>`
-  - [ ] Limit preview to ~30 rows
+- [X] **Commit 9:** `feat: render parsed table previews for A and B`
+  - [X] Render basic `<table>`
+  - [X] Limit preview to ~30 rows
   - ✅ Deliverable: parsed preview works
 
 ---
