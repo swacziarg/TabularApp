@@ -15,16 +15,16 @@
   - [X] Add scripts: `lint`, `format`
   - ✅ Deliverable: consistent formatting + basic lint rules
 
-- [ ] **Commit 3:** `chore: add github pages deploy workflow`
-  - [ ] Add GitHub Actions workflow for Pages deploy
-  - [ ] Set Vite `base` path config
+- [X] **Commit 3:** `chore: add github pages deploy workflow`
+  - [X] Add GitHub Actions workflow for Pages deploy
+  - [X] Set Vite `base` path config
   - ✅ Deliverable: app deploys on GitHub Pages
 
-- [ ] **Commit 4:** `feat: add basic app layout + header`
-  - [ ] Add layout shell
-    - [ ] Header: “Table Compare MVP”
-    - [ ] Main container
-    - [ ] Footer (optional version/build info)
+- [X] **Commit 4:** `feat: add basic app layout + header`
+  - [X] Add layout shell
+    - [X] Header: “Table Compare MVP”
+    - [X] Main container
+    - [X] Footer (optional version/build info)
   - ✅ Deliverable: nice-looking empty app deployed
 
 ---
