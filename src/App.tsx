@@ -1,3 +1,4 @@
+import { compareMissingByKey } from './utils/compare';
 import { buildRowObjects, type RowObject } from './utils/rows';
 import { autoDetectHasHeader, getHeadersAndDataRows } from './utils/headers';
 import { KeyColumnSelector } from './components/KeyColumnSelector';
@@ -34,6 +35,9 @@ export default function App() {
 
   const [keyColumnA, setKeyColumnA] = useState<string>('');
   const [keyColumnB, setKeyColumnB] = useState<string>('');
+
+  const [missingInA, setMissingInA] = useState<RowObject[]>([]);
+  const [missingInB, setMissingInB] = useState<RowObject[]>([]);
 
   const aHeaderInfo = useMemo(() => {
     if (!parsedA) return null;
@@ -88,6 +92,17 @@ export default function App() {
 
     setKeyColumnA(defaultA);
     setKeyColumnB(defaultB);
+
+    const missing = compareMissingByKey({
+      rowsA: builtA.rows,
+      rowsB: builtB.rows,
+      keyColumnA: defaultA,
+      keyColumnB: defaultB,
+      caseInsensitive,
+    });
+
+    setMissingInA(missing.missingInA);
+    setMissingInB(missing.missingInB);
   };
 
   const handleClear = () => {
@@ -97,6 +112,8 @@ export default function App() {
     setParsedB(null);
     setRowsA([]);
     setRowsB([]);
+    setMissingInA([]);
+    setMissingInB([]);
   };
 
   return (
@@ -234,10 +251,15 @@ export default function App() {
               disabled={!bHeaderInfo?.headers?.length}
             />
           </div>
-          
+
           <div className="parseMeta">
             <strong>Row objects:</strong> A={rowsA.length.toLocaleString()} • B=
             {rowsB.length.toLocaleString()}
+          </div>
+
+          <div className="parseMeta">
+            <strong>Missing:</strong> In A={missingInA.length.toLocaleString()} • In B=
+            {missingInB.length.toLocaleString()}
           </div>
 
           <label className="checkboxRow">
