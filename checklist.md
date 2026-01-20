@@ -38,9 +38,9 @@
   - [X] Buttons: Parse + Clear
   - ✅ Deliverable: paste content stored in state
 
-- [ ] **Commit 6:** `feat: add raw text preview + character/row counters`
-  - [ ] Show character count
-  - [ ] Show line count
+- [X] **Commit 6:** `feat: add raw text preview + character/row counters`
+  - [X] Show character count
+  - [X] Show line count
   - ✅ Deliverable: paste debug confidence
 
 - [ ] **Commit 7:** `feat: implement delimiter detection (tab/csv/pipe/semicolon/space)`
