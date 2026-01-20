@@ -1,4 +1,5 @@
-import { compareMissingByKey } from './utils/compare';
+import { compareChangedByKey, compareMissingByKey } from './utils/compare';
+import type { ChangedRow } from './utils/compare';
 import { buildRowObjects, type RowObject } from './utils/rows';
 import { autoDetectHasHeader, getHeadersAndDataRows } from './utils/headers';
 import { KeyColumnSelector } from './components/KeyColumnSelector';
@@ -38,6 +39,8 @@ export default function App() {
 
   const [missingInA, setMissingInA] = useState<RowObject[]>([]);
   const [missingInB, setMissingInB] = useState<RowObject[]>([]);
+
+  const [changedRows, setChangedRows] = useState<ChangedRow[]>([]);
 
   const aHeaderInfo = useMemo(() => {
     if (!parsedA) return null;
@@ -103,6 +106,18 @@ export default function App() {
 
     setMissingInA(missing.missingInA);
     setMissingInB(missing.missingInB);
+
+    const changed = compareChangedByKey({
+      rowsA: builtA.rows,
+      rowsB: builtB.rows,
+      keyColumnA: defaultA,
+      keyColumnB: defaultB,
+      headersA: aInfo.headers,
+      headersB: bInfo.headers,
+      caseInsensitive,
+    });
+
+    setChangedRows(changed.changedRows);
   };
 
   const handleClear = () => {
@@ -114,6 +129,7 @@ export default function App() {
     setRowsB([]);
     setMissingInA([]);
     setMissingInB([]);
+    setChangedRows([]);
   };
 
   return (
@@ -261,7 +277,11 @@ export default function App() {
             <strong>Missing:</strong> In A={missingInA.length.toLocaleString()} • In B=
             {missingInB.length.toLocaleString()}
           </div>
-
+          
+          <div className="parseMeta">
+            <strong>Changed:</strong> {changedRows.length.toLocaleString()} rows
+          </div>
+          
           <label className="checkboxRow">
             <input
               type="checkbox"
