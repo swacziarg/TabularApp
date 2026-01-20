@@ -1,4 +1,5 @@
 import { detectDelimiter } from './utils/delimiters';
+import { parseTextToGrid, type ParsedGrid } from './utils/parse';
 import { useMemo, useState } from 'react';
 import './App.css';
 
@@ -16,6 +17,9 @@ export default function App() {
   const [tableAText, setTableAText] = useState('');
   const [tableBText, setTableBText] = useState('');
 
+  const [parsedA, setParsedA] = useState<ParsedGrid | null>(null);
+  const [parsedB, setParsedB] = useState<ParsedGrid | null>(null);
+
   const aChars = tableAText.length;
   const bChars = tableBText.length;
 
@@ -29,12 +33,18 @@ export default function App() {
   const detectedB = useMemo(() => detectDelimiter(tableBText), [tableBText]);
 
   const handleParse = () => {
-    alert('Parse clicked (coming next)');
+    const a = parseTextToGrid(tableAText);
+    const b = parseTextToGrid(tableBText);
+
+    setParsedA(a);
+    setParsedB(b);
   };
 
   const handleClear = () => {
     setTableAText('');
     setTableBText('');
+    setParsedA(null);
+    setParsedB(null);
   };
 
   return (
@@ -69,6 +79,17 @@ export default function App() {
               <div className="rawPreviewHeader">Raw preview (first 10 lines)</div>
               <pre className="rawPreviewBody">{aPreview || '—'}</pre>
             </div>
+
+            <div className="parseMeta">
+              <strong>Parsed:</strong>{' '}
+              {parsedA ? (
+                <>
+                  {parsedA.rowCount} rows × {parsedA.colCount} cols ({parsedA.delimiterLabel})
+                </>
+              ) : (
+                '—'
+              )}
+            </div>
           </section>
 
           <section className="card">
@@ -93,6 +114,17 @@ export default function App() {
             <div className="rawPreview">
               <div className="rawPreviewHeader">Raw preview (first 10 lines)</div>
               <pre className="rawPreviewBody">{bPreview || '—'}</pre>
+            </div>
+
+            <div className="parseMeta">
+              <strong>Parsed:</strong>{' '}
+              {parsedB ? (
+                <>
+                  {parsedB.rowCount} rows × {parsedB.colCount} cols ({parsedB.delimiterLabel})
+                </>
+              ) : (
+                '—'
+              )}
             </div>
           </section>
         </div>
