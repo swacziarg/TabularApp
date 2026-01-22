@@ -17,7 +17,7 @@ A lightweight client-side tool to compare two pasted tables.
 
 ## Live Demo
 
-This app is deployed on GitHub Pages.
+This app is deployed on GitHub Pages at https://swacziarg.github.io/TabularApp/
 
 > If you fork/rename the repo, update the Vite `base` path in `vite.config.ts`.
 
