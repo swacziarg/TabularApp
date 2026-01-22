@@ -329,3 +329,17 @@
   font-weight: 700;
   font-size: 12px;
 }
+
+.resultsActionsRow {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+.copyStatus {
+  font-size: 12px;
+  opacity: 0.8;
+}

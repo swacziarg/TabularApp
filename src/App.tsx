@@ -1,4 +1,6 @@
 import { ChangedResultsTable } from './components/ChangedResultsTable';
+import { copyToClipboard } from './utils/clipboard';
+import { changedRowsToCsv, rowsToCsv } from './utils/csv';
 import { Tabs } from './components/Tabs';
 import { SummaryCards } from './components/SummaryCards';
 import { ResultsTable } from './components/ResultsTable';
@@ -47,6 +49,8 @@ export default function App() {
   const [changedRows, setChangedRows] = useState<ChangedRow[]>([]);
 
   const [activeTab, setActiveTab] = useState<'missingB' | 'missingA' | 'changed'>('missingB');
+
+  const [copyStatus, setCopyStatus] = useState<string>('');
 
   const aHeaderInfo = useMemo(() => {
     if (!parsedA) return null;
@@ -124,6 +128,34 @@ export default function App() {
     });
 
     setChangedRows(changed.changedRows);
+  };
+
+  const handleCopyMissingInB = async () => {
+    if (!aHeaderInfo) return;
+
+    const csv = rowsToCsv(aHeaderInfo.headers, missingInB);
+    await copyToClipboard(csv);
+
+    setCopyStatus(`Copied Missing in B (${missingInB.length})`);
+    setTimeout(() => setCopyStatus(''), 1500);
+  };
+
+  const handleCopyMissingInA = async () => {
+    if (!bHeaderInfo) return;
+
+    const csv = rowsToCsv(bHeaderInfo.headers, missingInA);
+    await copyToClipboard(csv);
+
+    setCopyStatus(`Copied Missing in A (${missingInA.length})`);
+    setTimeout(() => setCopyStatus(''), 1500);
+  };
+
+  const handleCopyChanged = async () => {
+    const csv = changedRowsToCsv(changedRows);
+    await copyToClipboard(csv);
+
+    setCopyStatus(`Copied Changed (${changedRows.length})`);
+    setTimeout(() => setCopyStatus(''), 1500);
   };
 
   const handleClear = () => {
@@ -330,6 +362,20 @@ export default function App() {
 
             <section className="card resultsCard">
               <h2 className="cardTitle">Results</h2>
+              
+              <div className="resultsActionsRow">
+                <button className="btnSecondary" onClick={handleCopyMissingInB}>
+                  Copy Missing in B CSV
+                </button>
+                <button className="btnSecondary" onClick={handleCopyMissingInA}>
+                  Copy Missing in A CSV
+                </button>
+                <button className="btnSecondary" onClick={handleCopyChanged}>
+                  Copy Changed CSV
+                </button>
+
+                {copyStatus ? <span className="copyStatus">{copyStatus}</span> : null}
+              </div>
 
               <Tabs
                 tabs={[

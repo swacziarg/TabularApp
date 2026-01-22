@@ -111,15 +111,15 @@
     - [X] Store before/after values
   - ✅ Deliverable: changed rows computed
 
-- [ ] **Commit 16:** `feat: show comparison summary counts + results tabs`
-  - [ ] Summary cards:
-    - [ ] Total A / Total B
-    - [ ] Missing in A / Missing in B
-    - [ ] Changed rows
-  - [ ] Tabs:
-    - [ ] Missing in B
-    - [ ] Missing in A
-    - [ ] Changed
+- [X] **Commit 16:** `feat: show comparison summary counts + results tabs`
+  - [X] Summary cards:
+    - [X] Total A / Total B
+    - [X] Missing in A / Missing in B
+    - [X] Changed rows
+  - [X] Tabs:
+    - [X] Missing in B
+    - [X] Missing in A
+    - [X] Changed
   - ✅ Deliverable: full compare workflow works
 
 ---
@@ -128,10 +128,10 @@
 
 **Goal:** Make output usable + shareable.
 
-- [ ] **Commit 17:** `feat: highlight changed cells in results table`
-  - [ ] Changed tab view: side-by-side or unified
-  - [ ] Highlight changed cells
-  - [ ] Add diff indicator per row
+- [X] **Commit 17:** `feat: highlight changed cells in results table`
+  - [X] Changed tab view: side-by-side or unified
+  - [X] Highlight changed cells
+  - [X] Add diff indicator per row
   - ✅ Deliverable: easy-to-spot diffs
 
 - [ ] **Commit 18:** `feat: add copy-to-clipboard for results`
