@@ -261,6 +261,18 @@ export default function App() {
               )}
             </div>
 
+            {parsedA?.warnings?.length ? (
+              <div className="warningBox">
+                <strong>Warnings:</strong>
+                <ul>
+                  {parsedA.warnings.map((w) => (
+                    <li key={w}>{w}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
+
             {parsedA?.rows?.length && aHeaderInfo ? (
               <div className="previewSection">
                 <div className="previewHeader">Parsed Preview</div>
@@ -312,6 +324,18 @@ export default function App() {
                 '—'
               )}
             </div>
+
+            {parsedB?.warnings?.length ? (
+              <div className="warningBox">
+                <strong>Warnings:</strong>
+                <ul>
+                  {parsedB.warnings.map((w) => (
+                    <li key={w}>{w}</li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+
 
             {parsedB?.rows?.length && bHeaderInfo ? (
               <div className="previewSection">
