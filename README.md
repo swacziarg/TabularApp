@@ -1,73 +1,136 @@
-# React + TypeScript + Vite
+# TabularApp (Table Compare MVP)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A lightweight client-side tool to compare two pasted tables.
 
-Currently, two official plugins are available:
+✅ Paste Table A + Table B  
+✅ Auto-detect delimiter (TSV / CSV / pipe / semicolon / multi-space)  
+✅ Select a key column  
+✅ See results:
+- Missing in A
+- Missing in B
+- Changed rows (highlighted)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+✅ Copy or download results as CSV  
+✅ Works fully in the browser (no backend)
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Live Demo
 
-## Expanding the ESLint configuration
+This app is deployed on GitHub Pages.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+> If you fork/rename the repo, update the Vite `base` path in `vite.config.ts`.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+---
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Supported Input Formats
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+You can paste tables from:
+
+### TSV (tab-separated)
+
+Example:
+```txt
+id	name	age
+1	Alice	30
+2	Bob	25
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### CSV (comma-separated)
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x';
-import reactDom from 'eslint-plugin-react-dom';
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-]);
+```csv
+id,name,age
+1,Alice,30
+2,Bob,25
 ```
+
+### Pipe (|)
+
+```txt
+id|name|age
+1|Alice|30
+2|Bob|25
+```
+
+### Semicolon (;)
+
+```txt
+id;name;age
+1;Alice;30
+2;Bob;25
+```
+
+### Multi-space (2+ spaces)
+
+```txt
+id  name   age
+1   Alice  30
+2   Bob    25
+```
+
+---
+
+## How to Use
+
+1. Paste Table A into the left box
+2. Paste Table B into the right box
+3. (Optional) Toggle **First row is header**
+4. Choose key columns:
+   - Key column (A)
+   - Key column (B)
+5. Click **Parse**
+6. View results:
+   - Missing in B
+   - Missing in A
+   - Changed (before → after)
+
+### Exporting
+
+You can export results via:
+- Copy CSV buttons
+- Download CSV buttons
+
+---
+
+## Run Locally
+
+```bash
+npm install
+npm run dev
+```
+
+Build production bundle:
+```bash
+npm run build
+npm run preview
+```
+
+---
+
+## Deploy to GitHub Pages
+
+This repo uses GitHub Actions to deploy.
+
+### Required Vite config
+
+In `vite.config.ts`, set:
+
+```typescript
+export default defineConfig({
+  base: '/TabularApp/',
+  plugins: [react()],
+});
+```
+
+The deployed app will be available at:
+```
+https://<your-username>.github.io/TabularApp/
+```
+
+---
+
+## Notes / Limitations
+
+- CSV parsing is basic (does not fully support quoted commas inside values yet)
+- Duplicate keys are reported as a warning
+- Ragged rows are auto-fixed with warnings
