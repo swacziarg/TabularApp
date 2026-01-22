@@ -1,21 +1,23 @@
+import { useEffect, useMemo, useState } from 'react';
+import './App.css';
+
+import { ChangedResultsTable } from './components/ChangedResultsTable';
+import { KeyColumnSelector } from './components/KeyColumnSelector';
+import { ResultsTable } from './components/ResultsTable';
+import { SummaryCards } from './components/SummaryCards';
+import { TablePreview } from './components/TablePreview';
+import { Tabs } from './components/Tabs';
+
+import { copyToClipboard } from './utils/clipboard';
+import { compareChangedByKey, compareMissingByKey, type ChangedRow } from './utils/compare';
+import { detectDelimiter } from './utils/delimiters';
 import { findDuplicateKeys } from './utils/duplicates';
 import { downloadTextFile } from './utils/download';
-import { ChangedResultsTable } from './components/ChangedResultsTable';
-import { copyToClipboard } from './utils/clipboard';
-import { changedRowsToCsv, rowsToCsv } from './utils/csv';
-import { Tabs } from './components/Tabs';
-import { SummaryCards } from './components/SummaryCards';
-import { ResultsTable } from './components/ResultsTable';
-import { compareChangedByKey, compareMissingByKey } from './utils/compare';
-import type { ChangedRow } from './utils/compare';
-import { buildRowObjects, type RowObject } from './utils/rows';
 import { autoDetectHasHeader, getHeadersAndDataRows } from './utils/headers';
-import { KeyColumnSelector } from './components/KeyColumnSelector';
-import { detectDelimiter } from './utils/delimiters';
 import { parseTextToGrid, type ParsedGrid } from './utils/parse';
-import { TablePreview } from './components/TablePreview';
-import { useMemo, useState } from 'react';
-import './App.css';
+import { buildRowObjects, type RowObject } from './utils/rows';
+import { changedRowsToCsv, rowsToCsv } from './utils/csv';
+import { loadFromStorage, saveToStorage } from './utils/storage';
 
 function getLineCount(text: string) {
   if (!text.trim()) return 0;
@@ -28,22 +30,28 @@ function getPreview(text: string, maxLines = 10) {
 }
 
 export default function App() {
-  const [tableAText, setTableAText] = useState('');
-  const [tableBText, setTableBText] = useState('');
+  const [tableAText, setTableAText] = useState(() => loadFromStorage('tableAText', ''));
+  const [tableBText, setTableBText] = useState(() => loadFromStorage('tableBText', ''));
 
   const [parsedA, setParsedA] = useState<ParsedGrid | null>(null);
   const [parsedB, setParsedB] = useState<ParsedGrid | null>(null);
-  
+
   const [rowsA, setRowsA] = useState<RowObject[]>([]);
   const [rowsB, setRowsB] = useState<RowObject[]>([]);
 
-  const [aFirstRowHeader, setAFirstRowHeader] = useState(false);
-  const [bFirstRowHeader, setBFirstRowHeader] = useState(false);
+  const [aFirstRowHeader, setAFirstRowHeader] = useState(() =>
+    loadFromStorage('aFirstRowHeader', false),
+  );
+  const [bFirstRowHeader, setBFirstRowHeader] = useState(() =>
+    loadFromStorage('bFirstRowHeader', false),
+  );
 
-  const [caseInsensitive, setCaseInsensitive] = useState(true);
+  const [caseInsensitive, setCaseInsensitive] = useState(() =>
+    loadFromStorage('caseInsensitive', true),
+  );
 
-  const [keyColumnA, setKeyColumnA] = useState<string>('');
-  const [keyColumnB, setKeyColumnB] = useState<string>('');
+  const [keyColumnA, setKeyColumnA] = useState<string>(() => loadFromStorage('keyColumnA', ''));
+  const [keyColumnB, setKeyColumnB] = useState<string>(() => loadFromStorage('keyColumnB', ''));
 
   const [missingInA, setMissingInA] = useState<RowObject[]>([]);
   const [missingInB, setMissingInB] = useState<RowObject[]>([]);
@@ -56,6 +64,34 @@ export default function App() {
 
   const [dupesA, setDupesA] = useState<string[]>([]);
   const [dupesB, setDupesB] = useState<string[]>([]);
+
+  useEffect(() => {
+    saveToStorage('tableAText', tableAText);
+  }, [tableAText]);
+
+  useEffect(() => {
+    saveToStorage('tableBText', tableBText);
+  }, [tableBText]);
+
+  useEffect(() => {
+    saveToStorage('aFirstRowHeader', aFirstRowHeader);
+  }, [aFirstRowHeader]);
+
+  useEffect(() => {
+    saveToStorage('bFirstRowHeader', bFirstRowHeader);
+  }, [bFirstRowHeader]);
+
+  useEffect(() => {
+    saveToStorage('caseInsensitive', caseInsensitive);
+  }, [caseInsensitive]);
+
+  useEffect(() => {
+    saveToStorage('keyColumnA', keyColumnA);
+  }, [keyColumnA]);
+
+  useEffect(() => {
+    saveToStorage('keyColumnB', keyColumnB);
+  }, [keyColumnB]);
 
   const aHeaderInfo = useMemo(() => {
     if (!parsedA) return null;
@@ -78,6 +114,13 @@ export default function App() {
 
   const detectedA = useMemo(() => detectDelimiter(tableAText), [tableAText]);
   const detectedB = useMemo(() => detectDelimiter(tableBText), [tableBText]);
+
+  const sharedHeaders = useMemo(() => {
+    const aHeaders = aHeaderInfo?.headers ?? [];
+    const bHeaders = bHeaderInfo?.headers ?? [];
+    const bSet = new Set(bHeaders);
+    return aHeaders.filter((h) => bSet.has(h));
+  }, [aHeaderInfo?.headers, bHeaderInfo?.headers]);
 
   const handleParse = () => {
     const a = parseTextToGrid(tableAText);
@@ -104,9 +147,11 @@ export default function App() {
     const firstAHeader = aInfo.headers[0] ?? '';
     const firstBHeader = bInfo.headers[0] ?? '';
 
-    // Prefer matching name if possible, else fall back to first column
     const defaultA = firstAHeader;
     const defaultB = bInfo.headers.includes(defaultA) ? defaultA : firstBHeader;
+
+    setKeyColumnA(defaultA);
+    setKeyColumnB(defaultB);
 
     const aDupes = findDuplicateKeys({
       rows: builtA.rows,
@@ -122,9 +167,6 @@ export default function App() {
 
     setDupesA(aDupes.duplicateKeys);
     setDupesB(bDupes.duplicateKeys);
-
-    setKeyColumnA(defaultA);
-    setKeyColumnB(defaultB);
 
     const missing = compareMissingByKey({
       rowsA: builtA.rows,
@@ -149,6 +191,12 @@ export default function App() {
 
     setChangedRows(changed.changedRows);
   };
+
+  useEffect(() => {
+    if (tableAText.trim() || tableBText.trim()) {
+      handleParse();
+    }
+  }, []);
 
   const handleCopyMissingInB = async () => {
     if (!aHeaderInfo) return;
@@ -221,13 +269,6 @@ export default function App() {
     setDupesB([]);
   };
 
-  const sharedHeaders = useMemo(() => {
-    const aHeaders = aHeaderInfo?.headers ?? [];
-    const bHeaders = bHeaderInfo?.headers ?? [];
-    const bSet = new Set(bHeaders);
-    return aHeaders.filter((h) => bSet.has(h));
-  }, [aHeaderInfo?.headers, bHeaderInfo?.headers]);
-
   return (
     <div className="appShell">
       <header className="appHeader">
@@ -265,7 +306,6 @@ export default function App() {
               First row is header
             </label>
 
-
             <div className="rawPreview">
               <div className="rawPreviewHeader">Raw preview (first 10 lines)</div>
               <pre className="rawPreviewBody">{aPreview || '—'}</pre>
@@ -292,7 +332,6 @@ export default function App() {
                 </ul>
               </div>
             ) : null}
-
 
             {parsedA?.rows?.length && aHeaderInfo ? (
               <div className="previewSection">
@@ -357,7 +396,6 @@ export default function App() {
               </div>
             ) : null}
 
-
             {parsedB?.rows?.length && bHeaderInfo ? (
               <div className="previewSection">
                 <div className="previewHeader">Parsed Preview</div>
@@ -397,7 +435,7 @@ export default function App() {
             <strong>Missing:</strong> In A={missingInA.length.toLocaleString()} • In B=
             {missingInB.length.toLocaleString()}
           </div>
-          
+
           <div className="parseMeta">
             <strong>Changed:</strong> {changedRows.length.toLocaleString()} rows
           </div>
@@ -500,7 +538,6 @@ export default function App() {
             </section>
           </>
         ) : null}
-
       </main>
 
       <footer className="appFooter">
