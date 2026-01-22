@@ -1,3 +1,4 @@
+import { findDuplicateKeys } from './utils/duplicates';
 import { downloadTextFile } from './utils/download';
 import { ChangedResultsTable } from './components/ChangedResultsTable';
 import { copyToClipboard } from './utils/clipboard';
@@ -53,6 +54,9 @@ export default function App() {
 
   const [copyStatus, setCopyStatus] = useState<string>('');
 
+  const [dupesA, setDupesA] = useState<string[]>([]);
+  const [dupesB, setDupesB] = useState<string[]>([]);
+
   const aHeaderInfo = useMemo(() => {
     if (!parsedA) return null;
     return getHeadersAndDataRows(parsedA.rows, aFirstRowHeader);
@@ -103,6 +107,21 @@ export default function App() {
     // Prefer matching name if possible, else fall back to first column
     const defaultA = firstAHeader;
     const defaultB = bInfo.headers.includes(defaultA) ? defaultA : firstBHeader;
+
+    const aDupes = findDuplicateKeys({
+      rows: builtA.rows,
+      keyColumn: defaultA,
+      caseInsensitive,
+    });
+
+    const bDupes = findDuplicateKeys({
+      rows: builtB.rows,
+      keyColumn: defaultB,
+      caseInsensitive,
+    });
+
+    setDupesA(aDupes.duplicateKeys);
+    setDupesB(bDupes.duplicateKeys);
 
     setKeyColumnA(defaultA);
     setKeyColumnB(defaultB);
@@ -198,6 +217,8 @@ export default function App() {
     setMissingInA([]);
     setMissingInB([]);
     setChangedRows([]);
+    setDupesA([]);
+    setDupesB([]);
   };
 
   const sharedHeaders = useMemo(() => {
@@ -380,6 +401,20 @@ export default function App() {
           <div className="parseMeta">
             <strong>Changed:</strong> {changedRows.length.toLocaleString()} rows
           </div>
+
+          {dupesA.length > 0 || dupesB.length > 0 ? (
+            <div className="warningBox">
+              <strong>Duplicate keys detected</strong>
+              <div className="parseMeta">
+                A: {dupesA.length.toLocaleString()} duplicate key(s)
+                {dupesA.length ? ` (ex: ${dupesA.slice(0, 5).join(', ')})` : ''}
+              </div>
+              <div className="parseMeta">
+                B: {dupesB.length.toLocaleString()} duplicate key(s)
+                {dupesB.length ? ` (ex: ${dupesB.slice(0, 5).join(', ')})` : ''}
+              </div>
+            </div>
+          ) : null}
 
           <label className="checkboxRow">
             <input
