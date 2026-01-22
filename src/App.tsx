@@ -1,3 +1,4 @@
+import { downloadTextFile } from './utils/download';
 import { ChangedResultsTable } from './components/ChangedResultsTable';
 import { copyToClipboard } from './utils/clipboard';
 import { changedRowsToCsv, rowsToCsv } from './utils/csv';
@@ -156,6 +157,35 @@ export default function App() {
 
     setCopyStatus(`Copied Changed (${changedRows.length})`);
     setTimeout(() => setCopyStatus(''), 1500);
+  };
+
+  const handleDownloadMissingInB = () => {
+    if (!aHeaderInfo) return;
+    const csv = rowsToCsv(aHeaderInfo.headers, missingInB);
+
+    downloadTextFile({
+      filename: 'missing_in_b.csv',
+      content: csv,
+    });
+  };
+
+  const handleDownloadMissingInA = () => {
+    if (!bHeaderInfo) return;
+    const csv = rowsToCsv(bHeaderInfo.headers, missingInA);
+
+    downloadTextFile({
+      filename: 'missing_in_a.csv',
+      content: csv,
+    });
+  };
+
+  const handleDownloadChanged = () => {
+    const csv = changedRowsToCsv(changedRows);
+
+    downloadTextFile({
+      filename: 'changed.csv',
+      content: csv,
+    });
   };
 
   const handleClear = () => {
@@ -362,7 +392,7 @@ export default function App() {
 
             <section className="card resultsCard">
               <h2 className="cardTitle">Results</h2>
-              
+
               <div className="resultsActionsRow">
                 <button className="btnSecondary" onClick={handleCopyMissingInB}>
                   Copy Missing in B CSV
@@ -373,7 +403,15 @@ export default function App() {
                 <button className="btnSecondary" onClick={handleCopyChanged}>
                   Copy Changed CSV
                 </button>
-
+                <button className="btnSecondary" onClick={handleDownloadMissingInB}>
+                  Download Missing in B CSV
+                </button>
+                <button className="btnSecondary" onClick={handleDownloadMissingInA}>
+                  Download Missing in A CSV
+                </button>
+                <button className="btnSecondary" onClick={handleDownloadChanged}>
+                  Download Changed CSV
+                </button>
                 {copyStatus ? <span className="copyStatus">{copyStatus}</span> : null}
               </div>
 
