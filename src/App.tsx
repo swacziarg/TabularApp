@@ -65,6 +65,10 @@ export default function App() {
   const [dupesA, setDupesA] = useState<string[]>([]);
   const [dupesB, setDupesB] = useState<string[]>([]);
 
+  const [aiSummary, setAiSummary] = useState<string>('');
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState<string>('');
+
   useEffect(() => {
     saveToStorage('tableAText', tableAText);
   }, [tableAText]);
@@ -190,6 +194,44 @@ export default function App() {
     });
 
     setChangedRows(changed.changedRows);
+  };
+
+  const handleGenerateAiSummary = async () => {
+    try {
+      setAiLoading(true);
+      setAiError('');
+      setAiSummary('');
+
+      // TEMP endpoint placeholder (we’ll replace after Render deploy)
+      const endpoint = 'http://localhost:8787/api/summarize';
+
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tableA: tableAText,
+          tableB: tableBText,
+          stats: {
+            totalA: rowsA.length,
+            totalB: rowsB.length,
+            missingInA: missingInA.length,
+            missingInB: missingInB.length,
+            changed: changedRows.length,
+          },
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error(`AI request failed (${res.status})`);
+      }
+
+      const data = (await res.json()) as { summary: string };
+      setAiSummary(data.summary || '');
+    } catch (err) {
+      setAiError(err instanceof Error ? err.message : 'Unknown error');
+    } finally {
+      setAiLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -536,6 +578,27 @@ export default function App() {
                 ) : null}
               </div>
             </section>
+            
+            {parsedA && parsedB ? (
+              <section className="card resultsCard">
+                <h2 className="cardTitle">AI Summary</h2>
+
+                <div className="resultsActionsRow">
+                  <button
+                    className="btnPrimary"
+                    onClick={handleGenerateAiSummary}
+                    disabled={aiLoading || !tableAText.trim() || !tableBText.trim()}
+                  >
+                    {aiLoading ? 'Generating…' : 'Generate AI Summary'}
+                  </button>
+
+                  {aiError ? <span className="copyStatus">⚠️ {aiError}</span> : null}
+                </div>
+
+                <pre className="aiBox">{aiSummary || '—'}</pre>
+              </section>
+            ) : null}
+
           </>
         ) : null}
       </main>
