@@ -204,7 +204,7 @@ export default function App() {
       setAiSummary('');
 
       // TEMP endpoint placeholder (we’ll replace after Render deploy)
-      const endpoint = 'http://localhost:8787/api/summarize';
+      const endpoint = 'https://tabularapp.onrender.com/api/summarize';
 
       const res = await fetch(endpoint, {
         method: 'POST',
