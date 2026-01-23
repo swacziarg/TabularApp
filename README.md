@@ -134,3 +134,44 @@ https://<your-username>.github.io/TabularApp/
 - CSV parsing is basic (does not fully support quoted commas inside values yet)
 - Duplicate keys are reported as a warning
 - Ragged rows are auto-fixed with warnings
+
+# AI Summaries (Render Backend)
+
+This app can generate AI summaries for:
+- Table A
+- Table B
+- Differences (missing + changed)
+
+The frontend calls a small Node/Express backend deployed on Render.
+
+## Backend Endpoint
+
+The frontend uses:
+```
+https://tabularapp.onrender.com/api/summarize
+```
+
+## Render Setup (Server)
+
+The backend lives in the `/server` folder.
+
+To run locally:
+```bash
+cd server
+npm install
+npm run dev
+```
+
+Then the API will be available at:
+```
+http://localhost:8787/api/summarize
+```
+
+## Required Environment Variable
+
+On Render, set:
+```
+GROQ_API_KEY = your Groq API key
+```
+
+The backend will not work without it.

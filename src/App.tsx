@@ -69,6 +69,17 @@ export default function App() {
   const [aiLoading, setAiLoading] = useState(false);
   const [aiError, setAiError] = useState<string>('');
 
+  // ✅ Display toggles (persisted)
+  const [showRawPreview, setShowRawPreview] = useState(() =>
+    loadFromStorage('showRawPreview', false),
+  );
+  const [showParsedPreview, setShowParsedPreview] = useState(() =>
+    loadFromStorage('showParsedPreview', false),
+  );
+  const [showSettings, setShowSettings] = useState(() => loadFromStorage('showSettings', true));
+  const [showResults, setShowResults] = useState(() => loadFromStorage('showResults', true));
+  const [showAiSummary, setShowAiSummary] = useState(() => loadFromStorage('showAiSummary', false));
+
   useEffect(() => {
     saveToStorage('tableAText', tableAText);
   }, [tableAText]);
@@ -96,6 +107,43 @@ export default function App() {
   useEffect(() => {
     saveToStorage('keyColumnB', keyColumnB);
   }, [keyColumnB]);
+
+  // ✅ persist display toggles
+  useEffect(() => {
+    saveToStorage('showRawPreview', showRawPreview);
+  }, [showRawPreview]);
+
+  useEffect(() => {
+    saveToStorage('showParsedPreview', showParsedPreview);
+  }, [showParsedPreview]);
+
+  useEffect(() => {
+    saveToStorage('showSettings', showSettings);
+  }, [showSettings]);
+
+  useEffect(() => {
+    saveToStorage('showResults', showResults);
+  }, [showResults]);
+
+  useEffect(() => {
+    saveToStorage('showAiSummary', showAiSummary);
+  }, [showAiSummary]);
+
+  // ✅ escape hatch: ESC resets layout
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowRawPreview(false);
+        setShowParsedPreview(false);
+        setShowSettings(true);
+        setShowResults(true);
+        setShowAiSummary(false);
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, []);
 
   const aHeaderInfo = useMemo(() => {
     if (!parsedA) return null;
@@ -133,14 +181,14 @@ export default function App() {
     setParsedA(a);
     setParsedB(b);
 
-    const autoHeaderA = autoDetectHasHeader(a.rows);
-    const autoHeaderB = autoDetectHasHeader(b.rows);
-
-    setAFirstRowHeader(autoHeaderA);
-    setBFirstRowHeader(autoHeaderB);
-
-    const aInfo = getHeadersAndDataRows(a.rows, autoHeaderA);
-    const bInfo = getHeadersAndDataRows(b.rows, autoHeaderB);
+    const headerA = parsedA ? aFirstRowHeader : autoDetectHasHeader(a.rows);
+    const headerB = parsedB ? bFirstRowHeader : autoDetectHasHeader(b.rows);
+    
+    if (!parsedA) setAFirstRowHeader(headerA);
+    if (!parsedB) setBFirstRowHeader(headerB);
+    
+    const aInfo = getHeadersAndDataRows(a.rows, headerA);
+    const bInfo = getHeadersAndDataRows(b.rows, headerB);    
 
     const builtA = buildRowObjects(aInfo.headers, aInfo.dataRows);
     const builtB = buildRowObjects(bInfo.headers, bInfo.dataRows);
@@ -154,18 +202,24 @@ export default function App() {
     const defaultA = firstAHeader;
     const defaultB = bInfo.headers.includes(defaultA) ? defaultA : firstBHeader;
 
-    setKeyColumnA(defaultA);
-    setKeyColumnB(defaultB);
+    const nextKeyA = keyColumnA || defaultA;
+    const nextKeyB = keyColumnB || defaultB;
+    
+    if (!keyColumnA) setKeyColumnA(nextKeyA);
+    if (!keyColumnB) setKeyColumnB(nextKeyB);    
 
+    if (!aInfo.headers.includes(nextKeyA)) setKeyColumnA(defaultA);
+    if (!bInfo.headers.includes(nextKeyB)) setKeyColumnB(defaultB);
+    
     const aDupes = findDuplicateKeys({
       rows: builtA.rows,
-      keyColumn: defaultA,
+      keyColumn: nextKeyA,
       caseInsensitive,
     });
 
     const bDupes = findDuplicateKeys({
       rows: builtB.rows,
-      keyColumn: defaultB,
+      keyColumn: nextKeyB,
       caseInsensitive,
     });
 
@@ -175,8 +229,8 @@ export default function App() {
     const missing = compareMissingByKey({
       rowsA: builtA.rows,
       rowsB: builtB.rows,
-      keyColumnA: defaultA,
-      keyColumnB: defaultB,
+      keyColumnA: nextKeyA,
+      keyColumnB: nextKeyB,
       caseInsensitive,
     });
 
@@ -186,24 +240,111 @@ export default function App() {
     const changed = compareChangedByKey({
       rowsA: builtA.rows,
       rowsB: builtB.rows,
-      keyColumnA: defaultA,
-      keyColumnB: defaultB,
+      keyColumnA: nextKeyA,
+      keyColumnB: nextKeyB,
       headersA: aInfo.headers,
       headersB: bInfo.headers,
       caseInsensitive,
     });
 
     setChangedRows(changed.changedRows);
+
+  };
+  useEffect(() => {
+    if (keyColumnA) {
+      const aDupes = findDuplicateKeys({
+        rows: rowsA,
+        keyColumn: keyColumnA,
+        caseInsensitive,
+      });
+      setDupesA(aDupes.duplicateKeys);
+    } else {
+      setDupesA([]);
+    }
+  
+    if (keyColumnB) {
+      const bDupes = findDuplicateKeys({
+        rows: rowsB,
+        keyColumn: keyColumnB,
+        caseInsensitive,
+      });
+      setDupesB(bDupes.duplicateKeys);
+    } else {
+      setDupesB([]);
+    }
+  }, [rowsA, rowsB, keyColumnA, keyColumnB, caseInsensitive]);
+  useEffect(() => {
+    if (!parsedA || !parsedB) return;
+  
+    const aInfo = getHeadersAndDataRows(parsedA.rows, aFirstRowHeader);
+    const bInfo = getHeadersAndDataRows(parsedB.rows, bFirstRowHeader);
+  
+    const builtA = buildRowObjects(aInfo.headers, aInfo.dataRows);
+    const builtB = buildRowObjects(bInfo.headers, bInfo.dataRows);
+  
+    setRowsA(builtA.rows);
+    setRowsB(builtB.rows);
+  
+    // keep key columns valid
+    const defaultA = aInfo.headers[0] ?? '';
+    const defaultB = bInfo.headers.includes(defaultA) ? defaultA : bInfo.headers[0] ?? '';
+  
+    if (!aInfo.headers.includes(keyColumnA)) setKeyColumnA(defaultA);
+    if (!bInfo.headers.includes(keyColumnB)) setKeyColumnB(defaultB);
+  }, [
+    parsedA,
+    parsedB,
+    aFirstRowHeader,
+    bFirstRowHeader,
+    // include key columns because we validate them
+    keyColumnA,
+    keyColumnB,
+  ]);
+  
+  const recomputeComparison = () => {
+    if (!aHeaderInfo || !bHeaderInfo) return;
+    if (!keyColumnA || !keyColumnB) return;
+
+    if (!aHeaderInfo.headers.includes(keyColumnA)) return;
+    if (!bHeaderInfo.headers.includes(keyColumnB)) return;
+
+    const missing = compareMissingByKey({
+      rowsA,
+      rowsB,
+      keyColumnA,
+      keyColumnB,
+      caseInsensitive,
+    });
+
+    setMissingInA(missing.missingInA);
+    setMissingInB(missing.missingInB);
+
+    const changed = compareChangedByKey({
+      rowsA,
+      rowsB,
+      keyColumnA,
+      keyColumnB,
+      headersA: aHeaderInfo.headers,
+      headersB: bHeaderInfo.headers,
+      caseInsensitive,
+    });
+
+    setChangedRows(changed.changedRows);
   };
 
+  
+  useEffect(() => {
+    recomputeComparison();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [keyColumnA, keyColumnB, caseInsensitive, rowsA, rowsB, aHeaderInfo, bHeaderInfo]);
+    
+
   const handleGenerateAiSummary = async () => {
-    console.log('Generate AI Summary clicked');
     try {
       setAiLoading(true);
       setAiError('');
       setAiSummary('');
 
-      // TEMP endpoint placeholder (we’ll replace after Render deploy)
       const endpoint = 'https://tabularapp.onrender.com/api/summarize';
 
       const res = await fetch(endpoint, {
@@ -239,6 +380,7 @@ export default function App() {
     if (tableAText.trim() || tableBText.trim()) {
       handleParse();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleCopyMissingInB = async () => {
@@ -310,6 +452,8 @@ export default function App() {
     setChangedRows([]);
     setDupesA([]);
     setDupesB([]);
+    setAiSummary('');
+    setAiError('');
   };
 
   return (
@@ -349,10 +493,12 @@ export default function App() {
               First row is header
             </label>
 
-            <div className="rawPreview">
-              <div className="rawPreviewHeader">Raw preview (first 10 lines)</div>
-              <pre className="rawPreviewBody">{aPreview || '—'}</pre>
-            </div>
+            {showRawPreview ? (
+              <div className="rawPreview">
+                <div className="rawPreviewHeader">Raw preview (first 10 lines)</div>
+                <pre className="rawPreviewBody">{aPreview || '—'}</pre>
+              </div>
+            ) : null}
 
             <div className="parseMeta">
               <strong>Parsed:</strong>{' '}
@@ -376,7 +522,7 @@ export default function App() {
               </div>
             ) : null}
 
-            {parsedA?.rows?.length && aHeaderInfo ? (
+            {showParsedPreview && parsedA?.rows?.length && aHeaderInfo ? (
               <div className="previewSection">
                 <div className="previewHeader">Parsed Preview</div>
                 <TablePreview headers={aHeaderInfo.headers} rows={aHeaderInfo.dataRows} />
@@ -412,10 +558,12 @@ export default function App() {
               First row is header
             </label>
 
-            <div className="rawPreview">
-              <div className="rawPreviewHeader">Raw preview (first 10 lines)</div>
-              <pre className="rawPreviewBody">{bPreview || '—'}</pre>
-            </div>
+            {showRawPreview ? (
+              <div className="rawPreview">
+                <div className="rawPreviewHeader">Raw preview (first 10 lines)</div>
+                <pre className="rawPreviewBody">{bPreview || '—'}</pre>
+              </div>
+            ) : null}
 
             <div className="parseMeta">
               <strong>Parsed:</strong>{' '}
@@ -439,7 +587,7 @@ export default function App() {
               </div>
             ) : null}
 
-            {parsedB?.rows?.length && bHeaderInfo ? (
+            {showParsedPreview && parsedB?.rows?.length && bHeaderInfo ? (
               <div className="previewSection">
                 <div className="previewHeader">Parsed Preview</div>
                 <TablePreview headers={bHeaderInfo.headers} rows={bHeaderInfo.dataRows} />
@@ -448,64 +596,120 @@ export default function App() {
           </section>
         </div>
 
+        {/* ✅ ALWAYS VISIBLE: Display controls */}
         <section className="card settingsCard">
-          <h2 className="cardTitle">Settings</h2>
-
-          <div className="settingsGrid">
-            <KeyColumnSelector
-              label="Key column (A)"
-              value={keyColumnA}
-              onChange={setKeyColumnA}
-              options={aHeaderInfo?.headers ?? []}
-              disabled={!aHeaderInfo?.headers?.length}
-            />
-
-            <KeyColumnSelector
-              label="Key column (B)"
-              value={keyColumnB}
-              onChange={setKeyColumnB}
-              options={bHeaderInfo?.headers ?? []}
-              disabled={!bHeaderInfo?.headers?.length}
-            />
-          </div>
-
-          <div className="parseMeta">
-            <strong>Row objects:</strong> A={rowsA.length.toLocaleString()} • B=
-            {rowsB.length.toLocaleString()}
-          </div>
-
-          <div className="parseMeta">
-            <strong>Missing:</strong> In A={missingInA.length.toLocaleString()} • In B=
-            {missingInB.length.toLocaleString()}
-          </div>
-
-          <div className="parseMeta">
-            <strong>Changed:</strong> {changedRows.length.toLocaleString()} rows
-          </div>
-
-          {dupesA.length > 0 || dupesB.length > 0 ? (
-            <div className="warningBox">
-              <strong>Duplicate keys detected</strong>
-              <div className="parseMeta">
-                A: {dupesA.length.toLocaleString()} duplicate key(s)
-                {dupesA.length ? ` (ex: ${dupesA.slice(0, 5).join(', ')})` : ''}
-              </div>
-              <div className="parseMeta">
-                B: {dupesB.length.toLocaleString()} duplicate key(s)
-                {dupesB.length ? ` (ex: ${dupesB.slice(0, 5).join(', ')})` : ''}
-              </div>
-            </div>
-          ) : null}
+          <h2 className="cardTitle">Display</h2>
 
           <label className="checkboxRow">
             <input
               type="checkbox"
-              checked={caseInsensitive}
-              onChange={(e) => setCaseInsensitive(e.target.checked)}
+              checked={showRawPreview}
+              onChange={(e) => setShowRawPreview(e.target.checked)}
             />
-            Case-insensitive compare
+            Show raw preview
           </label>
+
+          <label className="checkboxRow">
+            <input
+              type="checkbox"
+              checked={showParsedPreview}
+              onChange={(e) => setShowParsedPreview(e.target.checked)}
+            />
+            Show parsed preview tables
+          </label>
+
+          <label className="checkboxRow">
+            <input
+              type="checkbox"
+              checked={showSettings}
+              onChange={(e) => setShowSettings(e.target.checked)}
+            />
+            Show settings
+          </label>
+
+          <label className="checkboxRow">
+            <input
+              type="checkbox"
+              checked={showResults}
+              onChange={(e) => setShowResults(e.target.checked)}
+            />
+            Show results
+          </label>
+
+          <label className="checkboxRow">
+            <input
+              type="checkbox"
+              checked={showAiSummary}
+              onChange={(e) => setShowAiSummary(e.target.checked)}
+            />
+            Show AI summary
+          </label>
+
+          <div className="parseMeta" style={{ marginTop: 8 }}>
+            Tip: press <strong>Esc</strong> to reset layout.
+          </div>
         </section>
+
+        {showSettings ? (
+          <section className="card settingsCard">
+            <h2 className="cardTitle">Settings</h2>
+
+            <div className="settingsGrid">
+              <KeyColumnSelector
+                label="Key column (A)"
+                value={keyColumnA}
+                onChange={setKeyColumnA}
+                options={aHeaderInfo?.headers ?? []}
+                disabled={!aHeaderInfo?.headers?.length}
+              />
+
+              <KeyColumnSelector
+                label="Key column (B)"
+                value={keyColumnB}
+                onChange={setKeyColumnB}
+                options={bHeaderInfo?.headers ?? []}
+                disabled={!bHeaderInfo?.headers?.length}
+              />
+            </div>
+
+            <div className="parseMeta">
+              <strong>Row objects:</strong> A={rowsA.length.toLocaleString()} • B=
+              {rowsB.length.toLocaleString()}
+            </div>
+
+            <div className="parseMeta">
+              <strong>Missing:</strong> In A={missingInA.length.toLocaleString()} • In B=
+              {missingInB.length.toLocaleString()}
+            </div>
+
+            <div className="parseMeta">
+              <strong>Changed:</strong> {changedRows.length.toLocaleString()} rows
+            </div>
+
+            {dupesA.length > 0 || dupesB.length > 0 ? (
+              <div className="warningBox">
+                <strong>Duplicate keys detected</strong>
+                <div className="parseMeta">
+                  A: {dupesA.length.toLocaleString()} duplicate key(s)
+                  {dupesA.length ? ` (ex: ${dupesA.slice(0, 5).join(', ')})` : ''}
+                </div>
+                <div className="parseMeta">
+                  B: {dupesB.length.toLocaleString()} duplicate key(s)
+                  {dupesB.length ? ` (ex: ${dupesB.slice(0, 5).join(', ')})` : ''}
+                </div>
+              </div>
+            ) : null}
+
+            <label className="checkboxRow">
+              <input
+                type="checkbox"
+                checked={caseInsensitive}
+                onChange={(e) => setCaseInsensitive(e.target.checked)}
+              />
+              Case-insensitive compare
+            </label>
+          </section>
+        ) : null}
 
         <div className="actionsRow">
           <button className="btnPrimary" onClick={handleParse}>
@@ -516,7 +720,7 @@ export default function App() {
           </button>
         </div>
 
-        {parsedA && parsedB ? (
+        {showResults && parsedA && parsedB ? (
           <>
             <section className="card resultsCard">
               <h2 className="cardTitle">Summary</h2>
@@ -579,28 +783,27 @@ export default function App() {
                 ) : null}
               </div>
             </section>
-
-            {parsedA && parsedB ? (
-              <section className="card resultsCard">
-                <h2 className="cardTitle">AI Summary</h2>
-
-                <div className="resultsActionsRow">
-                  <button
-                    className="btnPrimary"
-                    onClick={handleGenerateAiSummary}
-                    disabled={aiLoading || (!tableAText.trim() && !tableBText.trim())}
-                    >
-                    {aiLoading ? 'Generating…' : 'Generate AI Summary'}
-                  </button>
-
-                  {aiError ? <span className="copyStatus">⚠️ {aiError}</span> : null}
-                </div>
-
-                <pre className="aiBox">{aiSummary || '—'}</pre>
-              </section>
-            ) : null}
-
           </>
+        ) : null}
+
+        {showAiSummary && (tableAText.trim() || tableBText.trim()) ? (
+          <section className="card resultsCard">
+            <h2 className="cardTitle">AI Summary</h2>
+
+            <div className="resultsActionsRow">
+              <button
+                className="btnPrimary"
+                onClick={handleGenerateAiSummary}
+                disabled={aiLoading || (!tableAText.trim() && !tableBText.trim())}
+              >
+                {aiLoading ? 'Generating…' : 'Generate AI Summary'}
+              </button>
+
+              {aiError ? <span className="copyStatus">⚠️ {aiError}</span> : null}
+            </div>
+
+            <pre className="aiBox">{aiSummary || '—'}</pre>
+          </section>
         ) : null}
       </main>
 
