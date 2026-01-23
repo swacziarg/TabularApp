@@ -197,6 +197,7 @@ export default function App() {
   };
 
   const handleGenerateAiSummary = async () => {
+    console.log('Generate AI Summary clicked');
     try {
       setAiLoading(true);
       setAiError('');
@@ -578,7 +579,7 @@ export default function App() {
                 ) : null}
               </div>
             </section>
-            
+
             {parsedA && parsedB ? (
               <section className="card resultsCard">
                 <h2 className="cardTitle">AI Summary</h2>
@@ -587,8 +588,8 @@ export default function App() {
                   <button
                     className="btnPrimary"
                     onClick={handleGenerateAiSummary}
-                    disabled={aiLoading || !tableAText.trim() || !tableBText.trim()}
-                  >
+                    disabled={aiLoading || (!tableAText.trim() && !tableBText.trim())}
+                    >
                     {aiLoading ? 'Generating…' : 'Generate AI Summary'}
                   </button>
 
